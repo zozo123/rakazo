@@ -168,6 +168,34 @@ describe.skipIf(findVersion.status !== 0 || !findVersion.stdout.includes("GNU"))
 );
 
 describe.skipIf(findVersion.status !== 0 || !findVersion.stdout.includes("GNU"))(
+  "GNU home save traversal of names that are not valid UTF-8",
+  () => {
+    it("prunes excluded directories under such a name in a UTF-8 locale", async () => {
+      const home = await mkdtemp(path.join(tmpdir(), "rakazo-find-bytes-"));
+      try {
+        const odd = Buffer.concat([Buffer.from(`${home}/odd`), Buffer.from([0xff])]);
+        await mkdir(odd);
+        for (const name of ["node_modules/f", "kept/f"]) {
+          await mkdir(Buffer.concat([odd, Buffer.from(`/${path.dirname(name)}`)]));
+          await writeFile(Buffer.concat([odd, Buffer.from(`/${name}`)]), "data");
+        }
+        const result = spawnSync(
+          "bash",
+          ["-c", `cd "$1" && ${workspaceSaveFindCommand()} -print`, "odd-bytes", home],
+          // The computer image runs saves with LANG=C.UTF-8.
+          { encoding: "latin1", env: { ...process.env, LC_ALL: "C.UTF-8" } },
+        );
+        expect(result.stderr).toBe("");
+        expect(result.status).toBe(0);
+        expect(result.stdout.trim().split("\n")).toEqual(["./odd\xff/kept/f"]);
+      } finally {
+        await rm(home, { recursive: true, force: true });
+      }
+    });
+  },
+);
+
+describe.skipIf(findVersion.status !== 0 || !findVersion.stdout.includes("GNU"))(
   "GNU home save traversal with many tags",
   () => {
     it("keeps the arguments bounded and saves the tagged directories past the cap", async () => {

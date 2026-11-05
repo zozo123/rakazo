@@ -135,6 +135,9 @@ export function workspaceSaveFindCommand(): string {
     .join(" -o ");
   const find = "find . -regextype posix-extended";
   const script = [
+    // Compare names byte for byte: in a UTF-8 locale GNU find's -path matching is over ten times
+    // slower, and a name that is not valid UTF-8 escapes the -regex exclusions.
+    "export LC_ALL=C",
     // Errors only cost a missed tag, which saves that directory; the second walk reports them.
     // Like isTaggedCacheDirectory, only a tag that starts with the signature counts.
     // A name with a newline cannot be listed one per line, so its directory is kept. The home
