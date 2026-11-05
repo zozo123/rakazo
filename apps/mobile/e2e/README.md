@@ -37,3 +37,4 @@ pnpm --filter @rakazo/mobile test:e2e -- \
 Run **Actions → mobile Android screenshots → Run workflow** to build the app, seed an isolated fake
 workspace, capture light and dark Android emulator views, upload diagnostics for seven days, and publish a
 persistent gallery beside the Playwright reports.
+
