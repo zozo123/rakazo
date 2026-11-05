@@ -602,3 +602,5 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             "$SSH_USER@$SSH_HOST" "deploy-main $GITHUB_SHA"
+
+# bench: touch ci.yml so every area runs
